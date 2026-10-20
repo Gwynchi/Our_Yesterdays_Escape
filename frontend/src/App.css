@@ -1,0 +1,277 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap");
+
+.oye-intro {
+  --oye-fade: 700ms; /* keep in sync with FADE_MS in IntroSequence.jsx */
+  --oye-plum: #2b0f3f;
+  --oye-cream: #fff8e8;
+  --oye-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: var(--oye-plum);
+  z-index: 1000;
+  overscroll-behavior: none;
+}
+
+.oye-intro__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.oye-intro__video[controls] {
+  pointer-events: auto;
+  z-index: 5;
+}
+
+/* 1. Fade in from black at the very start */
+.oye-intro__curtain {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 1;
+  animation: oye-curtain 1800ms ease-out 100ms forwards;
+  pointer-events: none;
+}
+@keyframes oye-curtain {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Dark vignette so the logo and card read clearly over the video */
+.oye-intro__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(18, 7, 12, 0.35) 0%, rgba(18, 7, 12, 0.78) 100%);
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  pointer-events: none;
+}
+.oye-intro--logo .oye-intro__scrim,
+.oye-intro--login .oye-intro__scrim {
+  opacity: 1;
+}
+
+/* ---- Stage: everything centered on one axis ------------------------------ */
+.oye-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.6dvh, 16px);
+  /* extra bottom padding lifts the group above true center */
+  padding: 3dvh 16px 7dvh;
+  text-align: center;
+  transition: opacity var(--oye-fade) ease;
+}
+.oye-intro--leaving .oye-stage {
+  opacity: 0;
+}
+
+/* 2. Logo: gentle pop, then docks above the card */
+.oye-logo {
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  height: auto;
+  max-width: min(78vw, 600px);
+  max-height: 34dvh;
+  opacity: 0;
+  transform: scale(0.88);
+  filter: drop-shadow(0 0 10px rgba(255, 248, 232, 0.55))
+    drop-shadow(0 2px 18px rgba(255, 248, 232, 0.35));
+  transition:
+    opacity 1.2s ease,
+    transform 1.6s cubic-bezier(0.34, 1.4, 0.64, 1), /* soft overshoot = "pop" */
+    max-height 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    max-width 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+  user-select: none;
+  pointer-events: none;
+}
+.oye-logo.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+.oye-logo.is-docked {
+  max-height: 17dvh;
+  max-width: min(60vw, 340px);
+}
+
+/* 3. Card opens under the logo, so the logo glides up on its own */
+.oye-card-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  width: min(92vw, 440px);
+  transition:
+    grid-template-rows 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity var(--oye-fade) ease 0.25s;
+}
+.oye-card-wrap.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.oye-card-wrap > .oye-glass {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- Glass card ----------------------------------------------------------- */
+.oye-glass {
+  padding: clamp(18px, 3.2dvh, 30px) clamp(20px, 5vw, 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.6dvh, 14px);
+  background: linear-gradient(150deg, rgba(255, 248, 232, 0.78), rgba(255, 248, 232, 0.6));
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  box-shadow:
+    0 28px 70px rgba(8, 2, 12, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(43, 15, 63, 0.08);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .oye-glass {
+    background: rgba(255, 248, 232, 0.96);
+  }
+}
+
+.oye-glass__title {
+  margin: 0;
+  font-family: var(--oye-hand);
+  font-size: clamp(2.6rem, 8vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.oye-glass__body {
+  width: 100%;
+}
+
+/* Styles any form passed as children (label under each input, as in the reference) */
+.oye-glass form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.6dvh, 14px);
+  width: 100%;
+}
+.oye-glass input {
+  width: 100%;
+  max-width: 320px;
+  padding: 11px 14px;
+  font: 500 1rem/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--oye-plum);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(43, 15, 63, 0.75);
+  border-radius: 10px;
+  outline: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.oye-glass input::placeholder {
+  color: rgba(43, 15, 63, 0.45);
+}
+.oye-glass input:focus-visible {
+  border-color: var(--oye-plum);
+  box-shadow: 0 0 0 4px rgba(43, 15, 63, 0.2);
+}
+.oye-glass label {
+  font-family: var(--oye-hand);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.oye-glass p,
+.oye-glass small {
+  margin: 2px 0 0;
+  max-width: 300px;
+  font-family: var(--oye-hand);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.oye-glass a {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+.oye-glass button {
+  min-width: 150px;
+  padding: 8px 28px;
+  font-family: var(--oye-hand);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--oye-cream);
+  background: var(--oye-plum);
+  border: 1.5px solid var(--oye-plum);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.oye-glass button:hover {
+  background: #44205e;
+  transform: translateY(-1px);
+}
+.oye-glass button:focus-visible {
+  outline: 3px solid rgba(43, 15, 63, 0.45);
+  outline-offset: 3px;
+}
+
+/* ---- Utility overlays --------------------------------------------------- */
+.oye-intro__tap {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 28px;
+  font-family: var(--oye-hand);
+  font-size: 1.4rem;
+  color: var(--oye-plum);
+  background: rgba(255, 248, 232, 0.9);
+  border: 2px solid var(--oye-plum);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.oye-intro__debug {
+  position: absolute;
+  z-index: 6;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font: 13px/1.4 ui-monospace, monospace;
+  background: rgba(255, 248, 232, 0.92);
+  border-radius: 6px;
+}
+
+@media (max-height: 640px) {
+  .oye-logo.is-docked {
+    max-height: 13dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oye-intro__curtain {
+    animation-duration: 1ms;
+  }
+  .oye-logo,
+  .oye-card-wrap,
+  .oye-intro__scrim,
+  .oye-stage {
+    transition-duration: 1ms;
+    transform: none;
+  }
+}
